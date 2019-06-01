@@ -8,6 +8,6 @@ const IPNController = require("./controllers/IPNController");
 
 routes.get("/", (req, res) => res.send("OK!"));
 
-routes.get("/ipn/:service", serviceMiddleware, IPNController.index);
+routes.post("/ipn/:service", serviceMiddleware, IPNController.index);
 
 module.exports = routes;
