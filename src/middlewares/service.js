@@ -1,5 +1,4 @@
 const PayPalService = require("../services/PayPal");
-const MercadoPagoService = require("../services/MercadoPago");
 
 module.exports = (req, res, next) => {
     const serviceParam = req.params.service;
