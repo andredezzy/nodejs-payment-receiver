@@ -1,5 +1,4 @@
 const request = require("request");
-const querystring = require("querystring");
 const Promise = require("bluebird");
 
 class PayPalService {
