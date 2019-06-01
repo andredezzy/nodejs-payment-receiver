@@ -1,7 +1,9 @@
-class IPNController {
+const service = require("./service");
+
+class PayPalController {
     async index(req, res) {
         // Send 200 status back to PayPal
-        res.status(200).send("OK");
+        res.status(200).send("Received!");
         res.end();
 
         const body = req.body || {};
@@ -9,7 +11,8 @@ class IPNController {
 
         // Validate IPN message with PayPal
         try {
-            const isValidated = await req.service.validate(body);
+            const isValidated = await service.validate(body);
+
             if (!isValidated) {
                 console.error("Error validating IPN message.");
                 return;
@@ -47,4 +50,4 @@ class IPNController {
     }
 }
 
-module.exports = new IPNController();
+module.exports = new PayPalController();
