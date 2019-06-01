@@ -5,6 +5,7 @@ class IPNController {
         res.end();
 
         const body = req.body || {};
+        console.log(body);
 
         // Validate IPN message with PayPal
         try {
