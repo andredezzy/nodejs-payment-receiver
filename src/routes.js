@@ -2,12 +2,13 @@ const express = require("express");
 
 const routes = express.Router();
 
-const serviceMiddleware = require("./middlewares/service");
+const PayPalController = require("./controllers/PayPal");
 
-const IPNController = require("./controllers/IPNController");
+routes.get("/", (req, res) => res.send("/ -> OK!"));
 
-routes.get("/", (req, res) => res.send("OK!"));
+routes.post("/ipn/paypal", PayPalController.index);
+routes.post("/ipn/paypal/payment", PayPalController.store);
 
-routes.get("/ipn/:service", serviceMiddleware, IPNController.index);
+routes.post("/ipn/mercadopago", (req, res) => res.send("TODO"));
 
 module.exports = routes;
