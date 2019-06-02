@@ -1,7 +1,7 @@
 const service = require("./service");
 
 class PayPalController {
-    async index(req, res) {
+    async notify(req, res) {
         // Send 200 status back to PayPal
         res.status(200).send("OK!");
         res.end();
@@ -27,8 +27,7 @@ class PayPalController {
             }
 
             // IPN Message is validated!
-            const transactionType = body.txn_type;
-            response = await service.extract(transactionType);
+            response = await service.extract(body);
 
             return res.status(response.status).json(response);
         } catch (e) {
@@ -36,7 +35,7 @@ class PayPalController {
         }
     }
 
-    async store(req, res) {
+    async create(req, res) {
         const { items, description } = req.body;
 
         /*
@@ -52,9 +51,18 @@ class PayPalController {
             description: "Just a test payment"
         */
 
-        await service.createPayment(items, description);
+        const payment = await service.payment(items, description);
 
-        return res.send("test");
+        return res.send(payment);
+    }
+
+    async get(req, res) {
+        const { paymentId } = req.query;
+
+        return service
+            .get(paymentId)
+            .then(payment => res.status(payment.httpStatusCode).send(payment))
+            .catch(error => res.status(error.httpStatusCode).send(error));
     }
 }
 
