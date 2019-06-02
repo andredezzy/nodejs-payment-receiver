@@ -1,5 +1,4 @@
 const request = require("request");
-const Promise = require("bluebird");
 
 const { paypal } = require("../../config");
 
@@ -45,7 +44,11 @@ class PayPalService {
         });
     }
 
-    extract(transactionType) {
+    extract(body) {
+        const transactionType = body.txn_type;
+
+        console.log("Transaction type: ", transactionType);
+
         var transactionInfo = {
             status: 200,
             type: transactionType,
@@ -54,6 +57,7 @@ class PayPalService {
 
         switch (transactionType) {
             case "web_accept":
+            case "cart":
             case "subscr_payment":
                 const status = body.payment_status;
                 const amount = body.mc_gross;
@@ -80,40 +84,64 @@ class PayPalService {
                     }
                 };
         }
+
+        return transactionInfo;
     }
 
-    createPayment(items, description) {
-        var paymentJson = {
-            intent: "sale",
-            payer: {
-                payment_method: "paypal"
-            },
-            redirect_urls: {
-                return_url:
-                    "https://nodejs-payment-receiver.herokuapp.com/ipn/paypal",
-                cancel_url: "http://cancel.url"
-            },
-            transactions: [
-                {
-                    item_list: {
-                        items
-                    },
-                    amount: {
-                        currency: "BRL",
-                        total: "1.00"
-                    },
-                    description
-                }
-            ]
-        };
+    payment(items, description) {
+        console.log("\nCreating payment...");
 
-        paypal.payment.create(paymentJson, function(error, payment) {
-            if (error) {
-                console.log(error);
-            } else {
-                console.log("Create Payment Response ->");
-                console.log(payment);
-            }
+        return new Promise((resolve, reject) => {
+            var paymentJson = {
+                intent: "order",
+                payer: {
+                    payment_method: "paypal"
+                },
+                redirect_urls: {
+                    return_url:
+                        "https://nodejs-payment-receiver.herokuapp.com/paypal/ipn",
+                    cancel_url:
+                        "https://nodejs-payment-receiver.herokuapp.com/canceled-order"
+                },
+                transactions: [
+                    {
+                        item_list: {
+                            items
+                        },
+                        amount: {
+                            currency: "BRL",
+                            total: "1.00"
+                        },
+                        description
+                    }
+                ]
+            };
+
+            paypal.payment.create(paymentJson, function(error, payment) {
+                if (error) {
+                    reject(error);
+                } else {
+                    console.log("Payment ->", payment, "\n");
+
+                    resolve(payment);
+                }
+            });
+        });
+    }
+
+    async get(id) {
+        console.log("\nGetting informations for payment id:", id + "...");
+
+        return new Promise((resolve, reject) => {
+            paypal.payment.get(id, function(error, payment) {
+                if (error) {
+                    reject(error);
+                } else {
+                    console.log("Info ->", payment, "\n");
+
+                    resolve(payment);
+                }
+            });
         });
     }
 }
