@@ -99,7 +99,7 @@ class PayPalService {
                 },
                 redirect_urls: {
                     return_url:
-                        "https://nodejs-payment-receiver.herokuapp.com/paypal/ipn",
+                        "https://nodejs-payment-receiver.herokuapp.com/paypal/payment",
                     cancel_url:
                         "https://nodejs-payment-receiver.herokuapp.com/canceled-order"
                 },
