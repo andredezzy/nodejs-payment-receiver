@@ -3,7 +3,7 @@ const service = require("./service");
 class PayPalController {
     async index(req, res) {
         // Send 200 status back to PayPal
-        res.status(200).send("Received!");
+        res.status(200).send("OK!");
         res.end();
 
         const body = req.body || {};
@@ -13,40 +13,48 @@ class PayPalController {
         try {
             const isValidated = await service.validate(body);
 
+            var response = {};
+
             if (!isValidated) {
-                console.error("Error validating IPN message.");
-                return;
+                response = {
+                    status: 401,
+                    message: "Error validating IPN message"
+                };
+
+                console.error(response);
+
+                return res.status(response.status).json(response);
             }
 
             // IPN Message is validated!
             const transactionType = body.txn_type;
+            response = await service.extract(transactionType);
 
-            switch (transactionType) {
-                case "web_accept":
-                case "subscr_payment":
-                    const status = body.payment_status;
-                    const amount = body.mc_gross;
-                    // Validate that the status is completed,
-                    // and the amount match your expectaions.
-                    break;
-                case "subscr_signup":
-                case "subscr_cancel":
-                case "subscr_eot":
-                    // Update user profile
-                    break;
-                case "recurring_payment_suspended":
-                case "recurring_payment_suspended_due_to_max_failed_payment":
-                    // Contact the user for more details
-                    break;
-                default:
-                    console.log(
-                        "Unhandled transaction type: ",
-                        transactionType
-                    );
-            }
+            return res.status(response.status).json(response);
         } catch (e) {
             console.error(e);
         }
+    }
+
+    store(req, res) {
+        const { items, description } = req.body;
+
+        /*
+            items: [
+                {
+                    name: "item",
+                    sku: "item",
+                    price: "1.00",
+                    currency: "USD",
+                    quantity: 1
+                }
+            ],
+            description: "Just a test payment"
+        */
+
+        const paymentResponse = service.createPayment(items, description);
+
+        return res.status(paymentResponse.status).json(paymentResponse);
     }
 }
 
