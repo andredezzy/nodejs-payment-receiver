@@ -83,15 +83,14 @@ class PayPalService {
     }
 
     createPayment(items, description) {
-        var response;
-
         var paymentJson = {
             intent: "sale",
             payer: {
                 payment_method: "paypal"
             },
             redirect_urls: {
-                return_url: "http://return.url",
+                return_url:
+                    "https://nodejs-payment-receiver.herokuapp.com/ipn/paypal",
                 cancel_url: "http://cancel.url"
             },
             transactions: [
@@ -110,17 +109,12 @@ class PayPalService {
 
         paypal.payment.create(paymentJson, function(error, payment) {
             if (error) {
-                response = { status: 400, message: error };
-                throw error;
+                console.log(error);
             } else {
                 console.log("Create Payment Response ->");
                 console.log(payment);
-
-                response = payment;
             }
         });
-
-        return response;
     }
 }
 

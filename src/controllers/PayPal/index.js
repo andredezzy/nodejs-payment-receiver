@@ -36,7 +36,7 @@ class PayPalController {
         }
     }
 
-    store(req, res) {
+    async store(req, res) {
         const { items, description } = req.body;
 
         /*
@@ -45,16 +45,16 @@ class PayPalController {
                     name: "item",
                     sku: "item",
                     price: "1.00",
-                    currency: "USD",
+                    currency: "BRL",
                     quantity: 1
                 }
             ],
             description: "Just a test payment"
         */
 
-        const paymentResponse = service.createPayment(items, description);
+        await service.createPayment(items, description);
 
-        return res.status(paymentResponse.status).json(paymentResponse);
+        return res.send("test");
     }
 }
 
